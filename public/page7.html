@@ -191,8 +191,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    // Check status every 2.5 seconds
-    const pollingInterval = setInterval(checkApproval, 2500);
+    // Check immediately, then every 1 second for the logout/admin response
+    checkApproval();
+    const pollingInterval = setInterval(checkApproval, 1000);
 });
 </script>
 
